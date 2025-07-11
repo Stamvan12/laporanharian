@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Laporan Harian</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A90E2; /* Blue */
+            --secondary-color: #50E3C2; /* Teal */
+            --accent-color: #F5A623; /* Orange */
+            --text-color: #333333;
+            --light-text-color: #666666;
+            --background-color: #F8F9FA;
+            --card-background: #FFFFFF;
+            --border-color: #E0E0E0;
+            --success-color: #28A745;
+            --error-color: #DC3545;
+            --info-color: #17A2B8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea,
+        select {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            outline: none;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-right: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #3A7BD5; /* Slightly darker blue */
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        button#logoutButton {
+            background-color: var(--error-color);
+            margin-left: 15px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        button#logoutButton:hover {
+            background-color: #C82333;
+        }
+
+        .report-item {
+            background-color: var(--background-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--secondary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer; /* Make it clickable */
+            transition: transform 0.2s ease;
+        }
+
+        .report-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .report-item p {
+            margin: 0 0 5px 0;
+            color: var(--text-color);
+        }
+
+        .report-item strong {
+            color: var(--primary-color);
+        }
+
+        .report-item small {
+            color: var(--light-text-color);
+            font-size: 0.85em;
+        }
+
+        .report-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .report-item a:hover {
+            text-decoration: underline;
+        }
+
+        #dailyReportOutput {
+            white-space: pre-wrap;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            font-family: 'monospace', 'Consolas', 'Courier New', monospace;
+            font-size: 0.95em;
+            color: var(--text-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .message.success {
+            background-color: #D4EDDA;
+            color: var(--success-color);
+            border: 1px solid #C3E6CB;
+        }
+
+        .message.error {
+            background-color: #F8D7DA;
+            color: var(--error-color);
+            border: 1px solid #F5C6CB;
+        }
+
+        .message.info {
+            background-color: #D1ECF1;
+            color: var(--info-color);
+            border: 1px solid #BEE5EB;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            overflow: hidden; /* Ensures rounded corners apply to table content */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #F0F4F8; /* Light stripe for readability */
+        }
+
+        tr:hover {
+            background-color: #E8F0F7;
+        }
+
+        /* Specific styles for SPV status table */
+        #spvStatusTable td:nth-child(5) { /* Status column */
+            font-weight: 600;
+        }
+
+        #spvStatusTable tr.status-late {
+            background-color: #FEEAEA; /* Light red for late */
+        }
+
+        #spvStatusTable tr.status-pending {
+            background-color: #FFF3CD; /* Light yellow for pending */
+        }
+
+        #spvStatusTable tr.status-submitted-late {
+            background-color: #FFE0B2; /* Light orange for late submission */
+        }
+
+        #spvStatusTable tr.status-on-time {
+            background-color: #E6F7ED; /* Light green for on time */
+        }
+
+        #spvStatusTable tr.status-waiting {
+            background-color: #E0F2F7; /* Light blue for waiting */
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .close-button {
+            color: var(--light-text-color);
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--error-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            button#logoutButton {
+                margin-left: 0;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aplikasi Laporan Harian</h1>
+        <div id="authSection">
+            <h2>Login</h2>
+            <div id="loginMessage" class="message hidden"></div>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+                <button type="button" id="showRegisterForm">Register</button>
+            </form>
+
+            <h2 id="registerTitle" class="hidden">Register</h2>
+            <div id="registerMessage" class="message hidden"></div>
+            <form id="registerForm" class="hidden">
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <select id="registerDivision" required>
+                    <!-- Options will be loaded by JS -->
+                </select>
+                <!-- Role selection removed for employee-only registration -->
+                <button type="submit">Register</button>
+                <button type="button" id="showLoginForm">Back to Login</button>
+            </form>
+        </div>
+
+        <div id="appSection" class="hidden">
+            <p>Selamat datang, <strong id="loggedInUsername"></strong> (<span id="loggedInRole"></span>)! <button id="logoutButton">Logout</button></p>
+
+            <div id="employeeSection" class="hidden">
+                <h2>Input Laporan (Per 2 Jam)</h2>
+                <form id="reportForm">
+                    <textarea id="reportText" placeholder="Deskripsi laporan Anda..." rows="5" required></textarea>
+                    <input type="file" id="reportPhoto" accept="image/*">
+                    <button type="submit">Simpan Laporan</button>
+                </form>
+
+                <h2>Laporan Hari Ini</h2>
+                <div id="currentReports">
+                    <p>Belum ada laporan hari ini.</p>
+                </div>
+
+                <h2>Buat Laporan Harian</h2>
+                <button id="generateDailyReport">Generate Laporan Harian</button>
+                <div id="dailyReportOutput"></div>
+            </div>
+
+            <div id="spvSection" class="hidden">
+                <h2>Dashboard SPV</h2>
+                <h3>Status Laporan Karyawan Hari Ini</h3>
+                <button id="refreshSpvStatus">Refresh Status</button>
+                <div id="spvStatusMessage" class="message hidden"></div>
+                <table id="spvStatusTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Divisi</th>
+                            <th>Role</th>
+                            <th>Laporan Terakhir</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded by JS -->
+                    </tbody>
+                </table>
+
+                <h3>Semua Laporan (Terbaru)</h3>
+                <button id="refreshAllReports">Refresh Semua Laporan</button>
+                <div id="allReportsMessage" class="message hidden"></div>
+                <div id="allReportsList">
+                    <!-- Data will be loaded by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Detail Modal -->
+    <div id="reportDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Detail Laporan</h2>
+            <div class="modal-body">
+                <p><strong>Pengguna:</strong> <span id="modalUsername"></span></p>
+                <p><strong>Waktu:</strong> <span id="modalTimestamp"></span></p>
+                <p><strong>Deskripsi:</strong> <span id="modalText"></span></p>
+                <div id="modalPhotoContainer">
+                    <p><strong>Foto Bukti:</strong></p>
+                    <img id="modalPhoto" src="" alt="Foto Bukti Kerja">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Sound -->
+    <audio id="notificationSound" src="https://www.soundjay.com/buttons/button-1.mp3" preload="auto"></audio>
+
+    <script>
+        const authSection = document.getElementById('authSection');
+        const appSection = document.getElementById('appSection');
+        const employeeSection = document.getElementById('employeeSection');
+        const spvSection = document.getElementById('spvSection');
+
+        const loginForm = document.getElementById('loginForm');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginMessage = document.getElementById('loginMessage');
+        const showRegisterFormBtn = document.getElementById('showRegisterForm');
+
+        const registerForm = document.getElementById('registerForm');
+        const registerTitle = document.getElementById('registerTitle');
+        const registerUsername = document.getElementById('registerUsername');
+        const registerPassword = document.getElementById('registerPassword');
+        const registerDivisionSelect = document.getElementById('registerDivision');
+        const registerMessage = document.getElementById('registerMessage');
+        const showLoginFormBtn = document.getElementById('showLoginForm');
+
+        const logoutButton = document.getElementById('logoutButton');
+        const loggedInUsernameSpan = document.getElementById('loggedInUsername');
+        const loggedInRoleSpan = document.getElementById('loggedInRole');
+
+        const reportForm = document.getElementById('reportForm');
+        const reportText = document.getElementById('reportText');
+        const reportPhoto = document.getElementById('reportPhoto');
+        const currentReportsDiv = document.getElementById('currentReports');
+        const generateDailyReportBtn = document.getElementById('generateDailyReport');
+        const dailyReportOutput = document.getElementById('dailyReportOutput');
+
+        const refreshSpvStatusBtn = document.getElementById('refreshSpvStatus');
+        const spvStatusTableBody = document.querySelector('#spvStatusTable tbody');
+        const spvStatusMessage = document.getElementById('spvStatusMessage');
+        const refreshAllReportsBtn = document.getElementById('refreshAllReports');
+        const allReportsList = document.getElementById('allReportsList');
+        const allReportsMessage = document.getElementById('allReportsMessage');
+
+        // Modal elements
+        const reportDetailModal = document.getElementById('reportDetailModal');
+        const closeButton = document.querySelector('.close-button');
+        const modalUsername = document.getElementById('modalUsername');
+        const modalTimestamp = document.getElementById('modalTimestamp');
+        const modalText = document.getElementById('modalText');
+        const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+        const modalPhoto = document.getElementById('modalPhoto');
+
+        const notificationSound = document.getElementById('notificationSound');
+
+        let currentToken = localStorage.getItem('accessToken');
+        let currentUserRole = localStorage.getItem('userRole');
+        let currentUsername = localStorage.getItem('username');
+
+        function showMessage(element, msg, type) {
+            element.textContent = msg;
+            element.className = `message ${type}`;
+            element.classList.remove('hidden');
+        }
+
+        function hideMessage(element) {
+            element.classList.add('hidden');
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            if (currentToken) {
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${currentToken}`
+                };
+            }
+            const response = await fetch(url, options);
+            if (response.status === 401 || response.status === 403) {
+                // Token invalid or expired, force logout
+                logout();
+                throw new Error('Unauthorized or Forbidden');
+            }
+            return response;
+        }
+
+        async function loadDivisions() {
+            try {
+                const response = await fetch('/divisions');
+                const divisions = await response.json();
+                registerDivisionSelect.innerHTML = '';
+                divisions.forEach(div => {
+                    const option = document.createElement('option');
+                    option.value = div.id;
+                    option.textContent = div.name;
+                    registerDivisionSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading divisions:', error);
+                showMessage(registerMessage, 'Gagal memuat daftar divisi.', 'error');
+            }
+        }
+
+        async function checkLoginStatus() {
+            if (currentToken && currentUsername && currentUserRole) {
+                loggedInUsernameSpan.textContent = currentUsername;
+                loggedInRoleSpan.textContent = currentUserRole;
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+
+                if (currentUserRole === 'employee') {
+                    employeeSection.classList.remove('hidden');
+                    spvSection.classList.add('hidden');
+                    loadReports();
+                } else if (currentUserRole === 'spv') {
+                    employeeSection.classList.add('hidden');
+                    spvSection.classList.remove('hidden');
+                    loadSpvStatus();
+                    loadAllReports();
+                }
+            } else {
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                employeeSection.classList.add('hidden');
+                spvSection.classList.add('hidden');
+                loadDivisions(); // Load divisions for registration
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            currentUserRole = null;
+            currentUsername = null;
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('username');
+            checkLoginStatus();
+            hideMessage(loginMessage);
+            hideMessage(registerMessage);
+            hideMessage(spvStatusMessage);
+            hideMessage(allReportsMessage);
+            dailyReportOutput.textContent = '';
+            spvStatusTableBody.innerHTML = '';
+            allReportsList.innerHTML = '';
+        }
+
+        // --- Login/Register Handlers ---
+        showRegisterFormBtn.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            loginMessage.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            registerTitle.classList.remove('hidden');
+            hideMessage(loginMessage);
+        });
+
+        showLoginFormBtn.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            registerTitle.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            hideMessage(registerMessage);
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage(loginMessage);
+            const username = loginUsername.value;
+            const password = loginPassword.value;
+
+            const formData = new URLSearchParams();
+            formData.append('username', username);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentToken = data.access_token;
+                    currentUserRole = data.role; 
+                    currentUsername = data.username;
+                    localStorage.setItem('accessToken', currentToken);
+                    localStorage.setItem('userRole', currentUserRole);
+                    localStorage.setItem('username', currentUsername);
+                    checkLoginStatus();
+                } else {
+                    showMessage(loginMessage, data.detail || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(loginMessage, 'Terjadi kesalahan saat login.', 'error');
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage(registerMessage);
+            const username = registerUsername.value;
+            const password = registerPassword.value;
+            const division_id = registerDivisionSelect.value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        division_id: parseInt(division_id)
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage(registerMessage, 'Registrasi berhasil! Silakan login.', 'success');
+                    registerForm.reset();
+                    showLoginFormBtn.click(); // Kembali ke form login
+                } else {
+                    showMessage(registerMessage, data.detail || 'Registrasi gagal', 'error');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showMessage(registerMessage, 'Terjadi kesalahan saat registrasi.', 'error');
+            }
+        });
+
+        logoutButton.addEventListener('click', logout);
+
+        // --- Employee Section Handlers ---
+        async function loadReports() {
+            try {
+                const response = await fetchWithAuth('/reports');
+                const data = await response.json();
+                currentReportsDiv.innerHTML = '';
+
+                if (data.reports && data.reports.length > 0) {
+                    data.reports.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.classList.add('report-item');
+                        let photoLink = '';
+                        if (report.photo) {
+                            photoLink = `<br><small><a href="${report.photo}" target="_blank">Lihat Foto</a></small>`;
+                        }
+                        reportItem.innerHTML = `
+                            <p><strong>${report.time}</strong>: ${report.text}</p>
+                            ${photoLink}
+                        `;
+                        currentReportsDiv.appendChild(reportItem);
+                    });
+                } else {
+                    currentReportsDiv.innerHTML = '<p>Belum ada laporan hari ini.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                currentReportsDiv.innerHTML = '<p class="message error">Gagal memuat laporan.</p>';
+            }
+        }
+
+        reportForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('report_text', reportText.value);
+            if (reportPhoto.files[0]) {
+                formData.append('report_photo', reportPhoto.files[0]);
+            }
+
+            try {
+                const response = await fetchWithAuth('/report', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showMessage(currentReportsDiv, result.message, 'success');
+                    reportText.value = '';
+                    reportPhoto.value = '';
+                    loadReports();
+                    notificationSound.play(); // Play sound on success
+                } else {
+                    showMessage(currentReportsDiv, `Error: ${result.detail || result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(currentReportsDiv, 'Terjadi kesalahan saat menyimpan laporan.', 'error');
+            }
+        });
+
+        generateDailyReportBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetchWithAuth('/daily_summary');
+                const data = await response.json();
+                dailyReportOutput.textContent = data.summary;
+            } catch (error) {
+                console.error('Error generating daily report:', error);
+                dailyReportOutput.textContent = 'Terjadi kesalahan saat membuat laporan harian.';
+            }
+        });
+
+        // --- SPV Section Handlers ---
+        async function loadSpvStatus() {
+            try {
+                const response = await fetchWithAuth('/spv/users_status');
+                const data = await response.json();
+                spvStatusTableBody.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(user => {
+                        const row = spvStatusTableBody.insertRow();
+                        row.insertCell().textContent = user.username;
+                        row.insertCell().textContent = user.division;
+                        row.insertCell().textContent = user.role;
+                        row.insertCell().textContent = user.last_report_time;
+                        const statusCell = row.insertCell();
+                        statusCell.textContent = user.status;
+
+                        // Add class based on status for styling
+                        if (user.status.includes("Terlambat")) {
+                            row.classList.add('status-late');
+                        } else if (user.status.includes("Belum Lapor")) {
+                            row.classList.add('status-pending');
+                        } else if (user.status.includes("Lapor Terlambat")) {
+                            row.classList.add('status-submitted-late');
+                        } else if (user.status.includes("Sudah lapor")) {
+                            row.classList.add('status-on-time');
+                        } else if (user.status.includes("Menunggu")) {
+                            row.classList.add('status-waiting');
+                        }
+                    });
+                    hideMessage(spvStatusMessage);
+                } else {
+                    showMessage(spvStatusMessage, 'Tidak ada data status pengguna.', 'info');
+                }
+            } catch (error) {
+                console.error('Error loading SPV status:', error);
+                showMessage(spvStatusMessage, 'Gagal memuat status laporan karyawan.', 'error');
+            }
+        }
+
+        async function loadAllReports() {
+            try {
+                const response = await fetchWithAuth('/spv/all_reports');
+                const data = await response.json();
+                allReportsList.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.classList.add('report-item');
+                        reportItem.dataset.reportText = report.text;
+                        reportItem.dataset.reportTimestamp = new Date(report.timestamp).toLocaleString();
+                        reportItem.dataset.reportPhotoPath = report.photo_path || '';
+                        reportItem.dataset.reportOwnerId = report.owner_id; // Store owner_id
+
+                        // Fetch username for display
+                        fetchWithAuth(`/users/${report.owner_id}`).then(res => res.json()).then(user => {
+                            const username = user.username || `User ID: ${report.owner_id}`;
+                            reportItem.dataset.reportUsername = username; // Store username
+                            reportItem.innerHTML = `
+                                <p><strong>${new Date(report.timestamp).toLocaleString()}</strong> - ${username}: ${report.text}</p>
+                            `;
+                            allReportsList.appendChild(reportItem);
+                        }).catch(error => {
+                            console.error('Error fetching username:', error);
+                            reportItem.innerHTML = `
+                                <p><strong>${new Date(report.timestamp).toLocaleString()}</strong> - User ID: ${report.owner_id}: ${report.text}</p>
+                            `;
+                            allReportsList.appendChild(reportItem);
+                        });
+
+                        reportItem.addEventListener('click', () => {
+                            showReportDetail(reportItem.dataset.reportUsername, reportItem.dataset.reportTimestamp, reportItem.dataset.reportText, reportItem.dataset.reportPhotoPath);
+                        });
+                    });
+                    hideMessage(allReportsMessage);
+                } else {
+                    showMessage(allReportsMessage, 'Tidak ada laporan sama sekali.', 'info');
+                }
+            } catch (error) {
+                console.error('Error loading all reports:', error);
+                showMessage(allReportsMessage, 'Gagal memuat semua laporan.', 'error');
+            }
+        }
+
+        function showReportDetail(username, timestamp, text, photoPath) {
+            modalUsername.textContent = username;
+            modalTimestamp.textContent = timestamp;
+            modalText.textContent = text;
+
+            if (photoPath) {
+                modalPhoto.src = photoPath;
+                modalPhotoContainer.classList.remove('hidden');
+            } else {
+                modalPhoto.src = '';
+                modalPhotoContainer.classList.add('hidden');
+            }
+            reportDetailModal.style.display = 'flex'; // Use flex to center
+        }
+
+        closeButton.addEventListener('click', () => {
+            reportDetailModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target == reportDetailModal) {
+                reportDetailModal.style.display = 'none';
+            }
+        });
+
+        refreshSpvStatusBtn.addEventListener('click', loadSpvStatus);
+        refreshAllReportsBtn.addEventListener('click', loadAllReports);
+
+        // Initial check
+        checkLoginStatus();
+    </script>
+</body>
+</html>
